@@ -21,26 +21,25 @@ entity car
     model : String(50) not null;
     make_year : Integer not null;
     comfort_level : Integer not null;
+    car_registration_number : String(50) not null;
+    car_color : String(50) not null;
 }
 
 entity member_car
 {
     key id : UUID
         @Core.Computed;
-    car_registration_number : String(50) not null;
-    car_color : String(50) not null;
-    car_id : Association to one car;
-    member_id : Association to one member;
+    car_id: Association[1..*] to car on car_id.id = car_id;
+    member_id: Association[1..*] to member on member_id.id = member_id;
 }
 
 entity member_preference
 {
-    key member_id : UUID
-        @Core.Computed;
+    key member_id: Association[1] to member { id };
     is_smoking_allowed : Boolean not null;
     is_pet_allowed : Boolean not null;
-    chitchat_preference_id : Association to one chitchat_preference;
-    music_preference_id : Association to one music_preference;
+    chitchat_preference_id : Association[0..1] to chitchat_preference on chitchat_preference_id.id = chitchat_preference_id;
+    music_preference_id : Association [0..1] to music_preference on music_preference_id.id = music_preference_id;
 }
 
 entity music_preference
@@ -67,7 +66,7 @@ entity ride
     destination_city_id : UUID not null;
     seats_offered : Integer not null;
     contribution_per_head : Integer not null;
-    luggage_size_id : Association to one luggage_size;
+    luggage_size_id : Association[1] to ride on luggage_size_id.id = luggage_size_id;
     source_city_id : Association to one city;
 }
 
@@ -95,7 +94,7 @@ entity request
     enroute_city_id : UUID;
     created_on : Date not null;
     request_status_id : UUID not null;
-    ride_id : Association to one ride;
+    ride_id : Association[1] to ride on ride_id.id = ride_id;
 }
 
 entity enroute_city
