@@ -10,6 +10,8 @@ entity member
     contact_number : Integer not null;
     driving_licence_number : String(50);
     driving_licence_valid_from : Date;
+    cars : Association to many member_car on cars.member = $self;
+    member_preference : Association to member_preference on member_preference = $self;
 }
 
 entity car
@@ -21,25 +23,26 @@ entity car
     model : String(50) not null;
     make_year : Integer not null;
     comfort_level : Integer not null;
-    car_registration_number : String(50) not null;
-    car_color : String(50) not null;
+    members : Association to many member_car on members.car = $self;
 }
 
 entity member_car
 {
     key id : UUID
         @Core.Computed;
-    car_id: Association[1..*] to car on car_id.id = car_id;
-    member_id: Association[1..*] to member on member_id.id = member_id;
+    car: Association to car;
+    member: Association to member;
+    car_registration_number : String(50) not null;    
+    car_color : String(50) not null;
 }
 
 entity member_preference
 {
-    key member_id: Association[1] to member { id };
+    key member_id: Association to member { id };
     is_smoking_allowed : Boolean not null;
     is_pet_allowed : Boolean not null;
-    chitchat_preference_id : Association[0..1] to chitchat_preference on chitchat_preference_id.id = chitchat_preference_id;
-    music_preference_id : Association [0..1] to music_preference on music_preference_id.id = music_preference_id;
+    chitchat_preference: Association to chitchat_preference on chitchat_preference = $self; //elvileg id-ra mutat, ha nem adunk meg mezőt
+    music_preference: Association to music_preference on music_preference = $self;
 }
 
 entity music_preference
@@ -60,14 +63,14 @@ entity ride
 {
     key id : UUID
         @Core.Computed;
-    member_car_id : UUID not null;
+    member_car : Association to member_car on member_car = $self;
     created_on : Date not null;
     travel_start_time : Date not null;
-    destination_city_id : UUID not null;
     seats_offered : Integer not null;
     contribution_per_head : Integer not null;
-    luggage_size_id : Association[1] to ride on luggage_size_id.id = luggage_size_id;
-    source_city_id : Association to one city;
+    luggage_size : Association to luggage_size on luggage_size = $self;
+    source_city : Association to city on source_city = $self;
+    destination_city : Association to city on destination_city = $self;
 }
 
 entity luggage_size
@@ -90,19 +93,26 @@ entity request
 {
     key id : UUID
         @Core.Computed;
-    requester_id : UUID not null;
-    enroute_city_id : UUID;
+    requester :  Association to member on requester = $self; //member
+    enroute_city: Association to enroute_city on enroute_city = $self;
     created_on : Date not null;
-    request_status_id : UUID not null;
-    ride_id : Association[1] to ride on ride_id.id = ride_id;
+    request_status : Association to request_status on request_status = $self;
+    ride : Association to ride on ride = $self;
+}
+
+entity request_status
+{
+    key id : UUID
+        @Core.Computed;
+    description : String(50) not null;
 }
 
 entity enroute_city
 {
     key id : UUID
         @Core.Computed;
-    ride_id : UUID not null;
-    city_id : UUID not null;
+    ride : Association to ride on ride = $self;
+    city : Association to city on city = $self;
     order_from_source : Integer not null;
     prorated_contribution : Integer not null;
 }
